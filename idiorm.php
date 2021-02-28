@@ -105,6 +105,10 @@
      * @method $this havingNull($column_name)
      * @method $this havingNotNull($column_name)
      * @method $this havingRaw($clause, $parameters=array())
+     * @method $this forUpdate()
+     * @method $this lockInShareMode()
+     * @method $this onDuplicateKeyUpdate($fields)
+     * @method $this onDuplicateKeyIgnore()
      * @method static this clearCache($table_name = null, $connection_name = self::DEFAULT_CONNECTION)
      * @method array asArray()
      * @method bool setExpr($key, $value = null)
@@ -1485,7 +1489,7 @@
         /**
          * Sets Lock mode to lock in share mode
          */
-        public function lockInShareMode() {
+        public function lock_in_share_mode() {
             $this->_lock_mode = self::LOCK_MODE_SHARE;
             return $this;
         }
@@ -1493,7 +1497,7 @@
         /**
          * Sets Lock mode to lock in share mode
          */
-        public function forUpdate() {
+        public function for_update() {
             $this->_lock_mode = self::LOCK_MODE_UPDATE;
             return $this;
         }

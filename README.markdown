@@ -22,6 +22,22 @@ Idiorm
         ->on_duplicate_key_update(['foo' => 42])
         ->save();
   ``` 
+* Define lock mode. For `LOCK IN SHARE MODE`:
+  ```php
+    ORM::for_table('test')
+        ->select('foo')
+        ->where_id_is(42)
+        ->lock_in_share_mode()
+        ->findOne();
+  ```
+  for `FOR UPDATE`:
+  ```php
+    ORM::for_table('test')
+        ->select('foo')
+        ->where_id_is(42)
+        ->for_update()
+        ->findOne();
+  ```
 
 ### Feature/API complete
 
