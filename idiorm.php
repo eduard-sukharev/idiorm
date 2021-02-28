@@ -126,6 +126,10 @@
         const ON_DUPLICATE_KEY_STRATEGY_UPDATE = 'update';
         const ON_DUPLICATE_KEY_STRATEGY_IGNORE = 'ignore';
 
+        // LOCK modes
+        const LOCK_MODE_SHARE = 'share';
+        const LOCK_MODE_UPDATE = 'update';
+
         const DEFAULT_CONNECTION = 'default';
 
         // Limit clause style
@@ -211,6 +215,9 @@
 
         // Array of WHERE clauses
         protected $_where_conditions = array();
+
+        // Lock mode
+        protected $_lock_mode = null;
 
         // LIMIT
         protected $_limit = null;
@@ -1476,6 +1483,22 @@
         }
 
         /**
+         * Sets Lock mode to lock in share mode
+         */
+        public function lockInShareMode() {
+            $this->_lock_mode = self::LOCK_MODE_SHARE;
+            return $this;
+        }
+
+        /**
+         * Sets Lock mode to lock in share mode
+         */
+        public function forUpdate() {
+            $this->_lock_mode = self::LOCK_MODE_UPDATE;
+            return $this;
+        }
+
+        /**
          * Add an ORDER BY clause to the query
          */
         protected function _add_order_by($column_name, $ordering) {
@@ -1665,6 +1688,7 @@
                 $this->_build_order_by(),
                 $this->_build_limit(),
                 $this->_build_offset(),
+                $this->_build_lock(),
             ));
         }
 
@@ -1786,6 +1810,18 @@
                 }
                 return "$clause " . $this->_offset;
             }
+            return '';
+        }
+
+        protected function _build_lock()
+        {
+            if ($this->_lock_mode === self::LOCK_MODE_SHARE) {
+                return 'LOCK IN SHARE MODE';
+            }
+            if ($this->_lock_mode === self::LOCK_MODE_UPDATE) {
+                return 'FOR UPDATE';
+            }
+
             return '';
         }
 
