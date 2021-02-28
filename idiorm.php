@@ -122,6 +122,10 @@
         const CONDITION_FRAGMENT = 0;
         const CONDITION_VALUES = 1;
 
+        // ON DUPLICATE KEY strategies
+        const ON_DUPLICATE_KEY_STRATEGY_UPDATE = 'update';
+        const ON_DUPLICATE_KEY_STRATEGY_IGNORE = 'ignore';
+
         const DEFAULT_CONNECTION = 'default';
 
         // Limit clause style
@@ -222,6 +226,12 @@
 
         // HAVING
         protected $_having_conditions = array();
+
+        // fields for building ON DUPLICATE KEY UPDATE column => value
+        protected $_on_duplicate_key_update_fields = null;
+
+        // ON DUPLICATE KEY IGNORE / UPDATE
+        protected $_on_duplicate_key_strategy = null;
 
         // The data for a hydrated instance of the class
         protected $_data = array();
@@ -2024,6 +2034,22 @@
         }
 
         /**
+         * Set update condition for upserts in MySQL
+         * @param array $fields
+         */
+        public function on_duplicate_key_update($fields) {
+            $this->_on_duplicate_key_strategy = self::ON_DUPLICATE_KEY_STRATEGY_UPDATE;
+            $this->_on_duplicate_key_update_fields = $fields;
+        }
+
+        /**
+         * Set ignoring for upserts in MySQL
+         */
+        public function on_duplicate_key_ignore() {
+            $this->_on_duplicate_key_strategy = self::ON_DUPLICATE_KEY_STRATEGY_IGNORE;
+        }
+
+        /**
          * Set a property on the ORM object.
          * @param string|array $key
          * @param string|null $value
@@ -2175,6 +2201,10 @@
                 $query[] = 'RETURNING ' . $this->_quote_identifier($this->_get_id_column_name());
             }
 
+            if (self::get_db($this->_connection_name)->getAttribute(PDO::ATTR_DRIVER_NAME) == 'mysql') {
+                $query[] = $this->_build_on_duplicate();
+            }
+
             return join(" ", $query);
         }
 
@@ -2188,6 +2218,23 @@
             );
             $this->_add_id_column_conditions($query);
             return self::_execute(join(" ", $query), is_array($this->id(true)) ? array_values($this->id(true)) : array($this->id(true)), $this->_connection_name);
+        }
+
+        private function _build_on_duplicate()
+        {
+            if ($this->_on_duplicate_key_strategy === self::ON_DUPLICATE_KEY_STRATEGY_IGNORE) {
+                return 'ON DUPLICATE KEY IGNORE';
+            }
+            if ($this->_on_duplicate_key_strategy === self::ON_DUPLICATE_KEY_STRATEGY_UPDATE) {
+                $field_list = array();
+                foreach ($this->_on_duplicate_key_update_fields as $key => $value) {
+                    $field_list[] = "{$this->_quote_identifier($key)} = $value";
+                }
+
+                return 'ON DUPLICATE KEY UPDATE ' . implode(', ', $field_list);
+            }
+
+            return '';
         }
 
         /**
