@@ -1,11 +1,28 @@
 Idiorm
 ======
 
-[![Build Status](https://travis-ci.org/j4mie/idiorm.png?branch=master)](https://travis-ci.org/j4mie/idiorm) [![Latest Stable Version](https://poser.pugx.org/j4mie/idiorm/v/stable.png)](https://packagist.org/packages/j4mie/idiorm) [![Total Downloads](https://poser.pugx.org/j4mie/idiorm/downloads.png)](https://packagist.org/packages/j4mie/idiorm) [![Code Climate](https://codeclimate.com/github/j4mie/idiorm/badges/gpa.svg)](https://codeclimate.com/github/j4mie/idiorm)
-
 [http://j4mie.github.com/idiormandparis/](http://j4mie.github.com/idiormandparis/)
 
 ---
+### Additions to original j4mie package 
+
+* Define `on duplicate key` strategy: ignore or update:
+  ```php
+    ORM::for_table('test')
+        ->create()
+        ->set('foo', 42)
+        ->on_duplicate_key_ignore()
+        ->save();
+  ``` 
+  or
+  ```php
+    ORM::for_table('test')
+        ->create()
+        ->set('foo', 42)
+        ->on_duplicate_key_update(['foo' => 42])
+        ->save();
+  ``` 
+
 ### Feature/API complete
 
 Idiorm is now considered to be feature complete as of version 1.5.0. Whilst it will continue to be maintained with bug fixes there will be no further new features added from this point on. This means that if a pull request makes breaking changes to the API or requires anything other than a patch version bump of the library then it will not be merged.
