@@ -2352,9 +2352,9 @@
 
             if (method_exists($this, $method)) {
                 return call_user_func_array(array($this, $method), $arguments);
-            } else {
-                throw new IdiormMethodMissingException("Method $name() does not exist in class " . get_class($this));
             }
+
+            throw new IdiormMethodMissingException("Method $name() does not exist in class " . get_class($this));
         }
 
         /**
