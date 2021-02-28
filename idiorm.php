@@ -1221,10 +1221,10 @@
             if (!is_array($values)) {
                 $values = array($values);
             }
-            $this->$conditions_class_property_name[] = array(
+            array_push($this->$conditions_class_property_name, array(
                 self::CONDITION_FRAGMENT => $fragment,
                 self::CONDITION_VALUES => $values,
-            );
+            ));
             return $this;
         }
 
