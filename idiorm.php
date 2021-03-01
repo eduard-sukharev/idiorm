@@ -2082,6 +2082,9 @@
          */
         public function on_duplicate_key_update($fields) {
             $this->_on_duplicate_key_strategy = self::ON_DUPLICATE_KEY_STRATEGY_UPDATE;
+            if (!isset($fields[$this->_get_id_column_name()])) {
+                $fields[$this->_get_id_column_name()] = 'LAST_INSERT_ID('.$this->_quote_identifier($this->_get_id_column_name()).')';
+            }
             $this->_on_duplicate_key_update_fields = $fields;
         }
 
@@ -2090,6 +2093,8 @@
          */
         public function on_duplicate_key_ignore() {
             $this->_on_duplicate_key_strategy = self::ON_DUPLICATE_KEY_STRATEGY_IGNORE;
+            $this->_on_duplicate_key_update_fields[$this->_get_id_column_name()] =
+                'LAST_INSERT_ID('.$this->_quote_identifier($this->_get_id_column_name()).')';
         }
 
         /**
@@ -2265,11 +2270,9 @@
 
         private function _build_on_duplicate()
         {
-            if ($this->_on_duplicate_key_strategy === self::ON_DUPLICATE_KEY_STRATEGY_IGNORE) {
-                return sprintf('ON DUPLICATE KEY UPDATE %1$s = %1$s', $this->_quote_identifier($this->_get_id_column_name()));
-            }
-            if ($this->_on_duplicate_key_strategy === self::ON_DUPLICATE_KEY_STRATEGY_UPDATE) {
+            if ($this->_on_duplicate_key_strategy !== null) {
                 $field_list = array();
+
                 foreach ($this->_on_duplicate_key_update_fields as $key => $value) {
                     $field_list[] = "{$this->_quote_identifier($key)} = $value";
                 }

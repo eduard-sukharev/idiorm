@@ -22,7 +22,7 @@ class QueryBuilderMySqlTest extends PHPUnit_Framework_TestCase {
         $widget->age = 10;
         $widget->on_duplicate_key_update(array('name' => "'Fred'"));
         $widget->save();
-        $expected = "INSERT INTO `widget` (`name`, `age`) VALUES ('Fred', '10') ON DUPLICATE KEY UPDATE `name` = 'Fred'";
+        $expected = "INSERT INTO `widget` (`name`, `age`) VALUES ('Fred', '10') ON DUPLICATE KEY UPDATE `name` = 'Fred', `id` = LAST_INSERT_ID(`id`)";
         $this->assertEquals($expected, ORM::get_last_query());
     }
 
@@ -32,7 +32,7 @@ class QueryBuilderMySqlTest extends PHPUnit_Framework_TestCase {
         $widget->age = 10;
         $widget->on_duplicate_key_update(array('age' => "`age` + 1"));
         $widget->save();
-        $expected = "INSERT INTO `widget` (`name`, `age`) VALUES ('Fred', '10') ON DUPLICATE KEY UPDATE `age` = `age` + 1";
+        $expected = "INSERT INTO `widget` (`name`, `age`) VALUES ('Fred', '10') ON DUPLICATE KEY UPDATE `age` = `age` + 1, `id` = LAST_INSERT_ID(`id`)";
         $this->assertEquals($expected, ORM::get_last_query());
     }
 
@@ -42,7 +42,7 @@ class QueryBuilderMySqlTest extends PHPUnit_Framework_TestCase {
         $widget->age = 12;
         $widget->on_duplicate_key_update(array('age' => "12"));
         $widget->save();
-        $expected = "INSERT INTO `widget` (`name`, `age`) VALUES ('George', '12') ON DUPLICATE KEY UPDATE `age` = 12";
+        $expected = "INSERT INTO `widget` (`name`, `age`) VALUES ('George', '12') ON DUPLICATE KEY UPDATE `age` = 12, `id` = LAST_INSERT_ID(`id`)";
         $this->assertEquals($expected, ORM::get_last_query());
     }
 
@@ -52,7 +52,7 @@ class QueryBuilderMySqlTest extends PHPUnit_Framework_TestCase {
         $widget->age = 10;
         $widget->on_duplicate_key_ignore();
         $widget->save();
-        $expected = "INSERT INTO `widget` (`name`, `age`) VALUES ('Fred', '10') ON DUPLICATE KEY UPDATE `id` = `id`";
+        $expected = "INSERT INTO `widget` (`name`, `age`) VALUES ('Fred', '10') ON DUPLICATE KEY UPDATE `id` = LAST_INSERT_ID(`id`)";
         $this->assertEquals($expected, ORM::get_last_query());
     }
 
@@ -62,7 +62,17 @@ class QueryBuilderMySqlTest extends PHPUnit_Framework_TestCase {
         $widget->age = 10;
         $widget->on_duplicate_key_ignore();
         $widget->save();
-        $expected = "INSERT INTO `widget` (`name`, `age`) VALUES ('Fred', '10') ON DUPLICATE KEY UPDATE `primary_key` = `primary_key`";
+        $expected = "INSERT INTO `widget` (`name`, `age`) VALUES ('Fred', '10') ON DUPLICATE KEY UPDATE `primary_key` = LAST_INSERT_ID(`primary_key`)";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
+    public function testInsertOnDuplicateKeyIgnoreNewRowCreatedNoLastInsertIdIfIdFieldDefined() {
+        $widget = ORM::for_table('widget')->create();
+        $widget->name = "Fred";
+        $widget->age = 10;
+        $widget->on_duplicate_key_update(array('id' => 1234));
+        $widget->save();
+        $expected = "INSERT INTO `widget` (`name`, `age`) VALUES ('Fred', '10') ON DUPLICATE KEY UPDATE `id` = 1234";
         $this->assertEquals($expected, ORM::get_last_query());
     }
 }
