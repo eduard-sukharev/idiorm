@@ -2266,7 +2266,7 @@
         private function _build_on_duplicate()
         {
             if ($this->_on_duplicate_key_strategy === self::ON_DUPLICATE_KEY_STRATEGY_IGNORE) {
-                return 'ON DUPLICATE KEY IGNORE';
+                return 'ON DUPLICATE KEY UPDATE ' . $this->_get_id_column_name() . ' = ' . $this->_get_id_column_name();
             }
             if ($this->_on_duplicate_key_strategy === self::ON_DUPLICATE_KEY_STRATEGY_UPDATE) {
                 $field_list = array();

@@ -6,15 +6,7 @@ Idiorm
 ---
 ### Additions to original j4mie package 
 
-* Define `on duplicate key` strategy: ignore or update:
-  ```php
-    ORM::for_table('test')
-        ->create()
-        ->set('foo', 42)
-        ->on_duplicate_key_ignore()
-        ->save();
-  ``` 
-  or
+* Define `on duplicate key` strategy update:
   ```php
     ORM::for_table('test')
         ->create()
@@ -22,6 +14,7 @@ Idiorm
         ->on_duplicate_key_update(['foo' => 42])
         ->save();
   ``` 
+  There's also a `on_duplicate_key_ignore` method, which is a shortcut to `ON DUPLICATE KEY UPDATE id = id`
 * Define lock mode. For `LOCK IN SHARE MODE`:
   ```php
     ORM::for_table('test')
