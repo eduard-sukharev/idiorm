@@ -2096,7 +2096,7 @@
          * Set a property on the ORM object.
          * @param string|array $key
          * @param string|null $value
-         * @param bool $raw Whether this value should be treated as raw or not
+         * @param bool $expr Whether this value should be treated as expression (inserted raw) or not
          */
         protected function _set_orm_property($key, $value = null, $expr = false) {
             if (!is_array($key)) {
@@ -2140,7 +2140,7 @@
             // remove any expression fields as they are already baked into the query
             $values = array_values(array_diff_key($this->_dirty_fields, $this->_expr_fields));
 
-            if (!$this->_is_new) { // UPDATE
+            if (!$this->_is_new && $this->_on_duplicate_key_strategy === null) { // UPDATE
                 // If there are no dirty values, do nothing
                 if (empty($values) && empty($this->_expr_fields)) {
                     return true;
@@ -2266,7 +2266,7 @@
         private function _build_on_duplicate()
         {
             if ($this->_on_duplicate_key_strategy === self::ON_DUPLICATE_KEY_STRATEGY_IGNORE) {
-                return 'ON DUPLICATE KEY UPDATE ' . $this->_get_id_column_name() . ' = ' . $this->_get_id_column_name();
+                return sprintf('ON DUPLICATE KEY UPDATE %1$s = %1$s', $this->_quote_identifier($this->_get_id_column_name()));
             }
             if ($this->_on_duplicate_key_strategy === self::ON_DUPLICATE_KEY_STRATEGY_UPDATE) {
                 $field_list = array();

@@ -122,5 +122,25 @@ class MockMsSqlPDO extends MockPDO {
         
         return parent::getAttribute($attribute);
     }
-    
+
+}
+
+class MockMySqlPDO extends MockPDO {
+
+   public $fake_driver = 'mysql';
+
+   /**
+    * If we are asking for the name of the driver, check if a fake one
+    * has been set.
+    */
+    public function getAttribute($attribute) {
+        if ($attribute == self::ATTR_DRIVER_NAME) {
+            if (!is_null($this->fake_driver)) {
+                return $this->fake_driver;
+            }
+        }
+
+        return parent::getAttribute($attribute);
+    }
+
 }
