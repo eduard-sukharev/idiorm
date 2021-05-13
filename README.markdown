@@ -31,6 +31,22 @@ Idiorm
         ->for_update()
         ->findOne();
   ```
+* Add more than one constraint to your joins:
+  ```php
+    ORM::for_table('foo')
+        ->table_alias('f')
+        ->select_many(array('b.title', 'f.category'))
+        ->left_outer_join('bar', array(array('f.id', '=', 'b.foo_id'), array('b.scale', '=', 'f.scale')), 'b')
+        ->find_one();
+  ```
+* Have value placeholders in raw join constraints:
+  ```php
+    ORM::for_table('foo')
+        ->table_alias('f')
+        ->select_many(array('b.title', 'f.category'))
+        ->raw_join('bar', array('b.scale', '=', '?'), 'b', array(42))
+        ->find_one();
+  ```
 
 ### Feature/API complete
 
