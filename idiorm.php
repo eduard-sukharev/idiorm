@@ -65,7 +65,7 @@
      * @method $this selectExpr($expr, $alias=null)
      * @method \ORM selectMany($values)
      * @method \ORM selectManyExpr($values)
-     * @method $this rawJoin($table, $constraint, $table_alias, $parameters = array())
+     * @method $this rawJoin($table, $constraint, $table_alias=null, $parameters = array())
      * @method $this innerJoin($table, $constraint, $table_alias=null)
      * @method $this leftOuterJoin($table, $constraint, $table_alias=null)
      * @method $this rightOuterJoin($table, $constraint, $table_alias=null)
@@ -1051,14 +1051,7 @@
                 $table_alias = $this->_quote_identifier($table_alias);
                 $table .= " {$table_alias}";
             }
-
-            // Build the constraint
-            if (is_array($constraint)) {
-                list($first_column, $operator, $second_column) = $constraint;
-                $first_column = $this->_quote_identifier($first_column);
-                $second_column = $this->_quote_identifier($second_column);
-                $constraint = "{$first_column} {$operator} {$second_column}";
-            }
+            $constraint = $this->_build_join_constraint($constraint);
 
             $this->_join_sources[] = "{$join_operator} {$table} ON {$constraint}";
             return $this;
@@ -1067,7 +1060,7 @@
         /**
          * Add a RAW JOIN source to the query
          */
-        public function raw_join($table, $constraint, $table_alias, $parameters = array()) {
+        public function raw_join($table, $constraint, $table_alias = null, $parameters = array()) {
             // Add table alias if present
             if (!is_null($table_alias)) {
                 $table_alias = $this->_quote_identifier($table_alias);
@@ -1077,12 +1070,7 @@
             $this->_values = array_merge($this->_values, $parameters);
 
             // Build the constraint
-            if (is_array($constraint)) {
-                list($first_column, $operator, $second_column) = $constraint;
-                $first_column = $this->_quote_identifier($first_column);
-                $second_column = $this->_quote_identifier($second_column);
-                $constraint = "{$first_column} {$operator} {$second_column}";
-            }
+            $constraint = $this->_build_join_constraint($constraint);
 
             $this->_join_sources[] = "{$table} ON {$constraint}";
             return $this;
@@ -2381,6 +2369,31 @@
             $method = strtolower(preg_replace('/([a-z])([A-Z])/', '$1_$2', $name));
 
             return call_user_func_array(array('ORM', $method), $arguments);
+        }
+
+        /**
+         * Build the constraint
+         * @param $constraints
+         * @return mixed|string
+         */
+        protected function _build_join_constraint($constraints)
+        {
+            if (is_array($constraints)) {
+                $first = reset($constraints);
+                if (!is_array($first)) {
+                    $constraints = array($constraints);
+                }
+                $constraintStrings = array();
+                foreach ($constraints as $condition) {
+                    list($first_column, $operator, $second_column) = $condition;
+                    $first_column = $first_column === '?' ? $first_column : $this->_quote_identifier($first_column);
+                    $second_column = $second_column === '?' ? $second_column : $this->_quote_identifier($second_column);
+                    $constraintStrings[] = "{$first_column} {$operator} {$second_column}";
+                }
+                $constraints = implode(' AND ', $constraintStrings);
+            }
+
+            return $constraints;
         }
     }
 

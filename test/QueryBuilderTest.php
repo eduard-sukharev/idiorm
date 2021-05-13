@@ -427,6 +427,12 @@ class QueryBuilderTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals($expected, ORM::get_last_query());
     }
 
+    public function testJoinWithMultipleConstraints() {
+        ORM::for_table('widget')->join('widget_handle', array(array("widget_handle.widget_id", "=", "widget.id"), array("widget_handle.widget_type", "=", "widget.type")))->find_many();
+        $expected = "SELECT * FROM `widget` JOIN `widget_handle` ON `widget_handle`.`widget_id` = `widget`.`id` AND `widget_handle`.`widget_type` = `widget`.`type`";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
     public function testRawJoin() {
         ORM::for_table('widget')->raw_join('INNER JOIN ( SELECT * FROM `widget_handle` )', array('widget_handle.widget_id', '=', 'widget.id'), 'widget_handle')->find_many();
         $expected = "SELECT * FROM `widget` INNER JOIN ( SELECT * FROM `widget_handle` ) `widget_handle` ON `widget_handle`.`widget_id` = `widget`.`id`";
@@ -436,6 +442,12 @@ class QueryBuilderTest extends PHPUnit_Framework_TestCase {
     public function testRawJoinWithParameters() {
         ORM::for_table('widget')->raw_join('INNER JOIN ( SELECT * FROM `widget_handle` WHERE `widget_handle`.name LIKE ? AND `widget_handle`.category = ?)', array('widget_handle.widget_id', '=', 'widget.id'), 'widget_handle', array('%button%', 2))->find_many();
         $expected = "SELECT * FROM `widget` INNER JOIN ( SELECT * FROM `widget_handle` WHERE `widget_handle`.name LIKE '%button%' AND `widget_handle`.category = '2') `widget_handle` ON `widget_handle`.`widget_id` = `widget`.`id`";
+        $this->assertEquals($expected, ORM::get_last_query());
+    }
+
+    public function testRawJoinWithParametersInConstraints() {
+        ORM::for_table('widget')->raw_join('INNER JOIN ( SELECT * FROM `widget_handle` WHERE `widget_handle`.name LIKE ?)', array('widget_handle.widget_type', '=', '?'), 'widget_handle', array('%button%', 'simple_widget'))->find_many();
+        $expected = "SELECT * FROM `widget` INNER JOIN ( SELECT * FROM `widget_handle` WHERE `widget_handle`.name LIKE '%button%') `widget_handle` ON `widget_handle`.`widget_type` = 'simple_widget'";
         $this->assertEquals($expected, ORM::get_last_query());
     }
 
@@ -547,7 +559,7 @@ class QueryBuilderTest extends PHPUnit_Framework_TestCase {
         $expected = "SELECT COUNT(*) AS `count` FROM `widget` LIMIT 1";
         $this->assertEquals($expected, ORM::get_last_query());
     }
-    
+
     public function testIgnoreSelectAndCount() {
     	ORM::for_table('widget')->select('test')->count();
     	$expected = "SELECT COUNT(*) AS `count` FROM `widget` LIMIT 1";
@@ -585,13 +597,13 @@ class QueryBuilderTest extends PHPUnit_Framework_TestCase {
         $expected = "UPDATE `widget` SET `added` = '2013-01-04' WHERE `id` = '1'";
         $this->assertEquals($expected, ORM::get_last_query());
     }
-    
+
     public function test_quote_multiple_identifiers_part() {
         $record = ORM::for_table('widget')->use_id_column(array('id1', 'id2'))->create();
         $expected = "`id1`, `id2`";
         $this->assertEquals($expected, $record->_quote_identifier($record->_get_id_column_name()));
     }
-    
+
     /**
      * Compound primary key tests
      */

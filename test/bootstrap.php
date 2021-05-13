@@ -11,7 +11,7 @@ class MockPDOStatement extends PDOStatement {
    private $current_row = 0;
    private $statement = NULL;
    private $bindParams = array();
-   
+
    /**
     * Store the statement that gets passed to the constructor
     */
@@ -55,7 +55,7 @@ class MockPDOStatement extends PDOStatement {
        // Add param to array
        $this->bindParams[is_int($paramno) ? --$paramno : $paramno] = $param;
    }
-   
+
    /**
     * Return some dummy data
     */
@@ -80,7 +80,7 @@ class MockDifferentPDOStatement extends MockPDOStatement { }
  *
  */
 class MockPDO extends PDO {
-   
+
    /**
     * Return a dummy PDO statement
     */
@@ -119,7 +119,7 @@ class MockMsSqlPDO extends MockPDO {
                 return $this->fake_driver;
             }
         }
-        
+
         return parent::getAttribute($attribute);
     }
 
