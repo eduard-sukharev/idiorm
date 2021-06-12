@@ -2070,7 +2070,7 @@
          */
         public function on_duplicate_key_update($fields = array()) {
             $this->_on_duplicate_key_strategy = self::ON_DUPLICATE_KEY_STRATEGY_UPDATE;
-            if (!isset($fields[$this->_get_id_column_name()])) {
+            if (!$fields) {
                 $fields[$this->_get_id_column_name()] = 'LAST_INSERT_ID('.$this->_quote_identifier($this->_get_id_column_name()).')';
             }
             $this->_on_duplicate_key_update_fields = $fields;
