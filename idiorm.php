@@ -2074,6 +2074,8 @@
                 $fields[$this->_get_id_column_name()] = 'LAST_INSERT_ID('.$this->_quote_identifier($this->_get_id_column_name()).')';
             }
             $this->_on_duplicate_key_update_fields = $fields;
+
+            return $this;
         }
 
         /**
@@ -2083,6 +2085,8 @@
             $this->_on_duplicate_key_strategy = self::ON_DUPLICATE_KEY_STRATEGY_IGNORE;
             $this->_on_duplicate_key_update_fields[$this->_get_id_column_name()] =
                 'LAST_INSERT_ID('.$this->_quote_identifier($this->_get_id_column_name()).')';
+
+            return $this;
         }
 
         /**
