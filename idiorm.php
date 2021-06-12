@@ -107,7 +107,7 @@
      * @method $this havingRaw($clause, $parameters=array())
      * @method $this forUpdate()
      * @method $this lockInShareMode()
-     * @method $this onDuplicateKeyUpdate($fields)
+     * @method $this onDuplicateKeyUpdate($fields=array())
      * @method $this onDuplicateKeyIgnore()
      * @method static this clearCache($table_name = null, $connection_name = self::DEFAULT_CONNECTION)
      * @method array asArray()
@@ -2068,7 +2068,7 @@
          * Set update condition for upserts in MySQL
          * @param array $fields
          */
-        public function on_duplicate_key_update($fields) {
+        public function on_duplicate_key_update($fields = array()) {
             $this->_on_duplicate_key_strategy = self::ON_DUPLICATE_KEY_STRATEGY_UPDATE;
             if (!isset($fields[$this->_get_id_column_name()])) {
                 $fields[$this->_get_id_column_name()] = 'LAST_INSERT_ID('.$this->_quote_identifier($this->_get_id_column_name()).')';
